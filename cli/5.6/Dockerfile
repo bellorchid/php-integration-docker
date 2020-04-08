@@ -1,19 +1,25 @@
-FROM php:5.5-cli
+FROM php:5.6-cli
 
 RUN apt-get update && apt-get install -y \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+        liblzo2-dev \
+        lzop \
+        git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd
 
 RUN docker-php-ext-configure pdo_mysql \
     && docker-php-ext-install pdo_mysql
 
+RUN apt-get install -y libicu-dev \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install intl
+
 RUN pecl channel-update pecl.php.net \
     && pecl install redis-4.3.0 \
-    && pecl install pdo_mysql-1.0.2 \
-    && docker-php-ext-enable redis pdo_mysql \
+    && docker-php-ext-enable redis \
     && php -m 
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
@@ -21,3 +27,11 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php --install-dir=/usr/bin --filename=composer \
     && php -r "unlink('composer-setup.php');"
 
+RUN apt-get install -y libmcrypt-dev \
+    && docker-php-ext-configure mcrypt \
+    && docker-php-ext-install mcrypt
+
+RUN docker-php-ext-configure zip \
+    && docker-php-ext-install zip
+
+COPY uploads.ini /usr/local/etc/php/conf.d
