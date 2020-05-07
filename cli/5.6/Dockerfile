@@ -35,3 +35,8 @@ RUN docker-php-ext-configure zip \
     && docker-php-ext-install zip
 
 COPY uploads.ini /usr/local/etc/php/conf.d
+
+RUN docker-php-ext-configure pcntl \
+    && docker-php-ext-install pcntl
+
+RUN php -m
